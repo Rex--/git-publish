@@ -1,0 +1,126 @@
+= git-publish
+
+Publish to remote directories with ease using `git` + `ssh`.
+
+== Workflow
+The basic workflow this suits is to keep a remote directory in sync with
+one on your local machine. It achieves this by pushing a local repository to a
+remote repository over ssh. This means an intermediate git host such as Github
+is not required. A server hook that fires after a successful push is used to
+trigger a force checkout of the main branch in a separate worktree on  the
+remote server. This worktree is the directory that is kept in sync with the
+local repo.
+
+.After setup of a remote repository as described in this document
+====
+ git clone <server>:/srv/git/example.git
+ cd example/
+ touch index.html
+ git add -A
+ git commit -m "Initial Commit"
+ git push
+====
+
+
+=== git-publish
+The `publish` git subcommand is a shorthand for the last three commands in the
+example above. It adds all files, increments a version number in the commit
+message, and pushes the current branch to origin. The previous commit is
+required to have a number as the last word in the commit message. The commit
+message is not required to be anything specific, so an initial commit such as
+"Initial Version 0" can be used. The initial commit must contain the starting
+version number, it is not required to be 0. The version number can be changed
+or reset at any time by manually creating a commit containing a number.
+
+.Setting up a local repo for using the publish command
+====
+ git clone <server>:/srv/git/example.git
+ cd example/
+ touch index.html
+ git add -A
+ git commit -m "Initial Version 0"
+ echo "<html><h1>Hello World</h1></html>" > index.html
+ git publish    # Publish Version 1
+====
+
+.Reset the version to 5
+====
+ git add -A
+ git commit -m "Reset Version 5"
+ # Change some files
+ git publish    # Publish Version 6
+====
+
+<<<
+
+== Setup
+Configuration is needed on the remote server that you would like to publish to
+set up some post-push hooks and a separate worktree for holding the published
+files. If you would like to use the `git publish` command, you will need to
+place the git-publish script somewhere it is available on your `$PATH`.
+
+
+=== Remote Configuration
+Some remote configuration is required to install the git hook and setup the
+worktree to serve files from. The ssh user you use to connect with git needs
+to have write permissions to both the bare repository and the publish
+directory. For the following examples, the bare git repo is
+`/srv/git/example.git` and the publish directory is `/srv/www/example.com`.
+
+==== Bare Repository
+To create the bare repository on the remote server, use the `--bare` flag. This
+is the repo that you will push to, so take note of the path.
+
+ git init --bare /srv/git/example.git
+
+==== Publish Directory
+The directory that stays in sync is referred to as the publish directory. It's
+actually an additional worktree on the bare repository that we set to point to
+our main branch. It can be any directory, not limited by the location of the
+bare repo that you push to. Create the publish directory worktree and point it
+to the master branch:
+
+ cd /srv/git/example.git/
+ git worktree add /srv/www/example.com master
+
+This will create the directory, init our worktree git files in
+`example.git/worktree/example.com`, and checkout the latest commit to master.
+
+==== post-receive
+The post receive hook needs to be copied to the `.git/hooks` directory in the
+bare repository. The easiest way to get it there is with scp. On your local
+machine:
+
+ scp post-receive <server>:/srv/git/example.git/hooks/
+
+Next, the hook must be edited to publish the correct worktree. Open the script
+in your favorite editor and change `GIT_WORK_TREE` to the publish directory
+path.
+
+ nano /srv/git/example.git/hooks/post-receive #GIT_WORK_TREE=/var/www/example.com
+ chmod +x /srv/git/example.git/hooks/post-receive
+
+IMPORTANT: The post-receive script must be marked as executable to run!
+
+
+=== Local Configuration
+No local configuration is required to publish to the remote server. Files can
+be added, committed, and pushed as normal. To push to the remote repository,
+it must be accessible over ssh(or another protocol).
+
+Clone the remote repo:
+
+ git clone <server>:/srv/git/example.git
+
+or add to an existing one:
+
+ git remote add origin <server>:/srv/git/example.git
+
+==== git-publish
+If you would like to use the `git publish` command, copy it to a folder on your
+`$PATH`. I like `~/.local/bin`.
+
+ cp git-publish ~/.local/bin
+
+
+

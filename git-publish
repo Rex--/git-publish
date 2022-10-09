@@ -1,0 +1,12 @@
+#!/bin/sh
+# This command publishes all files in the git repo as the next version.
+
+version_number="$(git log --pretty=format:"%s" -1 | rev | cut -d " " -f1 | rev)"
+echo "Current Version: $version_number"
+
+next_version_number="$(echo "$version_number + 1" | bc)"
+echo "Publishing Version: $next_version_number"
+
+git add -A
+git commit -m "Publish Version $next_version_number"
+git push origin master
