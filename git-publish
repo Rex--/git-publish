@@ -1,12 +1,134 @@
 #!/bin/sh
-# This command publishes all files in the git repo as the next version.
+# git-publish
+# (c) 2022 Rex McKinnon
 
-version_number="$(git log --pretty=format:"%s" -1 | rev | cut -d " " -f1 | rev)"
-echo "Current Version: $version_number"
 
-next_version_number="$(echo "$version_number + 1" | bc)"
-echo "Publishing Version: $next_version_number"
+# Setup defaults
+ACTION=PUBLISH
+DEFAULT_REMOTE=origin
+DEFAULT_BRANCH=master
+DEFAULT_FILES="-A"
+DEFAULT_MESSAGE="Publish Version"
 
-git add -A
-git commit -m "Publish Version $next_version_number"
-git push origin master
+# Parse flag options
+while getopts 'i:a:r:b:m:' flag
+do
+    echo $OPTIND
+
+    case $flag in
+        # i) ACTION=INIT; ACTION_ARG=$OPTARG ;;
+        # a) ACTION=ADD; ACTION_ARG=$OPTARG ;;
+        r) PUBLISH_REMOTE=$OPTARG ;;
+        b) PUBLISH_BRANCH=$OPTARG ;;
+        m) PUBLISH_MESSAGE=$OPTARG ;;
+        ?) exit 1 ;;
+    esac
+done
+
+# Take ACTION
+case $ACTION in
+
+    # Publish repo to remote directory
+    PUBLISH)
+        # Get list of files passed in
+        while [[ "$1" = \-* ]]
+        do
+            shift; shift
+        done
+        if [ -z "$1" ]; then
+            PUBLISH_FILES="$DEFAULT_FILES"
+            echo "Publishing repository:" "$(pwd)"
+        else
+            PUBLISH_FILES=$*
+            echo "Publishing files:" "$PUBLISH_FILES"
+        fi
+
+        # Create our commit message
+        if [ -z "$PUBLISH_MESSAGE" ]; then
+            # Get the last commit messsage
+            GIT_MESSAGE="$(git log --pretty=format:"%s" -1)"
+            # Check if the last commit message is empty
+            if [ -z "$GIT_MESSAGE" ]; then
+                # Set a default message
+                echo "Using default commit message:" "$DEFAULT_MESSAGE"
+                PUBLISH_MESSAGE=$DEFAULT_MESSAGE
+                # Set a default version
+                echo "Using default version:" "$DEFAULT_VERSION"
+                PUBLISH_VERSION=$DEFAULT_VERSION
+            else
+                # Use the last commit message if it's not empty
+                echo "Using last commit message:" "$GIT_MESSAGE"
+                PUBLISH_MESSAGE=$GIT_MESSAGE
+            fi
+        fi
+
+        # Check if publish version is empty
+        if [ -z "$PUBLISH_VERSION" ]; then
+            # Extract version from message. Should be the last word with no period
+            VERSION_CURRENT="$(echo "$PUBLISH_MESSAGE" | rev | cut -d " " -f1 | rev)"
+            # Verify that its a number
+            if [ -n "$VERSION_CURRENT" ] && [ "$VERSION_CURRENT" -eq "$VERSION_CURRENT" ] 2>/dev/null; then
+                # Strip old number from commit message
+                PUBLISH_MESSAGE="$(echo "$PUBLISH_MESSAGE" | rev | cut -d " " --fields=2- | rev)"
+
+                if [ -n "$GIT_MESSAGE" ]; then
+                    # Increment the version if we got it from the last commit
+                    echo "Incrementing commit version: $VERSION_CURRENT + 1"
+                    PUBLISH_VERSION="$(echo "$VERSION_CURRENT + 1" | bc)"
+                else
+                    # Use the version as-is if passed in as argument
+                    echo "Found message version:" "$VERSION_CURRENT"
+                    PUBLISH_VERSION=$VERSION_CURRENT
+                fi
+            else
+                # Not a number, check if we have one in the last commit message
+                unset VERSION_CURRENT
+                GIT_VERSION="$(git log --pretty=format:%s -1 | rev | cut -d " " -f1 | rev)"
+                if [ -n "$GIT_VERSION" ] && [ "$GIT_VERSION" -eq "$GIT_VERSION" ] 2>/dev/null; then
+                    echo "Incrementing commit version: $GIT_VERSION + 1"
+                    PUBLISH_VERSION="$(echo "$GIT_VERSION + 1" | bc)"
+                else
+                    # GIT_VERSION is not a number, use default
+                    unset GIT_VERSION
+                    echo "Using default version:" "$DEFAULT_VERSION"
+                    PUBLISH_VERSION=$DEFAULT_VERSION
+                fi
+            fi
+        fi
+
+        # Append next version number
+        PUBLISH_MESSAGE="$PUBLISH_MESSAGE $PUBLISH_VERSION"
+
+        # Add, Commit, and Push
+        git add "$PUBLISH_FILES"
+        git commit -m "\"$PUBLISH_MESSAGE\""
+        git push "${PUBLISH_REMOTE:-$DEFAULT_REMOTE}" "${PUBLISH_BRANCH:-$DEFAULT_BRANCH}"
+        echo "Published Version: $PUBLISH_VERSION"
+        ;;
+
+    INIT)
+        echo "Initializing empty repo: $ACTION_ARG"
+        ;;
+
+    ADD)
+        echo "Creating publish directory: $ACTION_ARG"
+        ;;
+
+esac
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,6 +1,12 @@
 = git-publish
+:link-github: https://github.com/Rex--/git-publish
+:link-docs: https://rex.mckinnon.ninja/git-publish
 
 Publish to remote directories with ease using `git` + `ssh`.
+
+WARNING: This document is *extremely* out of date, especially in reference to
+the usage. The basic concept still applies.
+
 
 == Workflow
 The basic workflow this suits is to keep a remote directory in sync with
@@ -17,9 +23,12 @@ local repo.
  cd example/
  touch index.html
  git add -A
- git commit -m "Initial Commit"
+ git commit -m "Publish Version 1"
  git push
 ====
+
+This will publish the files in the current branch to the remote publish
+directory.
 
 
 === git-publish
@@ -56,7 +65,9 @@ or reset at any time by manually creating a commit containing a number.
 == Setup
 Configuration is needed on the remote server that you would like to publish to
 set up some post-push hooks and a separate worktree for holding the published
-files. If you would like to use the `git publish` command, you will need to
+files.
+
+If you would like to use the `git publish` command, you will need to
 place the git-publish script somewhere it is available on your `$PATH`.
 
 
@@ -84,7 +95,7 @@ to the master branch:
  git worktree add /srv/www/example.com master
 
 This will create the directory, init our worktree git files in
-`example.git/worktree/example.com`, and checkout the latest commit to master.
+`example.git/worktrees/example.com`, and checkout the latest commit to master.
 
 ==== post-receive
 The post receive hook needs to be copied to the `.git/hooks` directory in the
@@ -123,4 +134,39 @@ If you would like to use the `git publish` command, copy it to a folder on your
  cp git-publish ~/.local/bin
 
 
+== Additional Considerations
 
+=== Linux file permissions
+The ssh user that you use to connect with git needs to have write permissions
+to both the bare repository and the publish directory. An example setup is
+a `publish` group that has *rwx* permissions to each parent directory:
+
+ # mkdir /srv/git /srv/publish
+ # groupadd publish
+ # chgrp publish /srv/git /srv/publish
+ # chmod g+w /srv/git /srv/publish
+ # usermod -aG publish git
+
+This will give the `git` user appropriate permissions to push to a repository
+at `<server>:/srv/git/example.git` and publish files in `/srv/publish/example`.
+Additional users can be granted permissions by adding them to the `publish` 
+group.
+
+=== Drawbacks
+
+&#46;git::
+Because we create an additional worktree for an existing repo, `.git` is a file
+that contains a path to the bare repo. This might expose sensitive information
+e.g. if serving the directory with a web server. The example `.git` created
+above contains the following:
+
+ gitdir: /srv/git/example.git/worktrees/example.com
+
+
+---
+
+More coming soon!
+
+[.text-center]
+[.big]#{link-github}[github] | {link-docs}[documentation]# +
+[.big]#&copy; 2022 Rex McKinnon# +
