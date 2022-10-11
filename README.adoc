@@ -1,6 +1,6 @@
 = git-publish
-:link-github: https://github.com/Rex--/git-publish
-:link-docs: https://rex.mckinnon.ninja/git-publish
+:link-github: https://github.com/Rex--/git-publish/tree/dev
+:link-docs: https://rex.mckinnon.ninja/git-publish-dev
 
 Publish to remote directories using `git` + `ssh`.
 

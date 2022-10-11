@@ -1,6 +1,4 @@
 #!/bin/sh
-# This simple post-receive hook checks out the latest commit in the branch.
-
-export GIT_WORK_TREE=/path/to/repo
-echo "Updating repo: $GIT_WORK_TREE"
-git checkout -f
+# This simple post-receive hook executes all .publish hooks in the current
+# directory.
+find -name "*.publish" -exec sh "{}" ";"
