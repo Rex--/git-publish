@@ -1,6 +1,7 @@
 = git-publish
 :link-github: https://github.com/Rex--/git-publish/tree/dev
 :link-docs: https://rex.mckinnon.ninja/git-publish-dev
+:icons: font
 
 Publish to remote directories using `git` + `ssh`.
 
@@ -30,6 +31,27 @@ to be set only once, as if no message is given the last commit message is used.
 
 
 == Setup
+Currently, `git-publish` and it's required programs have to be installed
+manually.
+
+=== Requirements
+A few common programs are required to use `git-publish`. They can typically be
+installed with your distro's package manager.
+
+`git`::
+git is required for, well, the `git` command. It's required to be installed on
+both your local machine and the remote server.
+
+`ssh`::
+ssh is required for running commands on the remote server and pulling from git
+repositories. It will also need to be installed on both the local machine and
+the remote server. The remote server should be running an ssh server that is
+accessible from the local machine.
+
+`bash`::
+Currently, the `git-publish` script uses a few "bashism"s, it is not guaranteed
+to run in other shells. Because of this, `bash` is listed as a requirement,
+however it may work in others.
 
 === Installing git-publish
 To install the `git publish` command, simply place the script somewhere it is
@@ -38,19 +60,34 @@ available on your $PATH and mark it executable.
  $ cp git-publish ~/.local/bin
  $ chmod a+x ~/.local/bin/git-publish
 
-Alternatively to stay up-to-date with the latest release, link directly to the git repository. It's recommended to checkout a tag or a commit in this case.
+Alternatively to stay up-to-date with the latest release, link directly to the
+git repository. It's recommended to checkout a tag or a commit in this case.
 
-.The following example has not been tested
+.The following has not been testedw
  $ git checkout --detach master
  $ ln -s git-publish ~/.local/bin
  $ chmod a+x git-publish
 
 
+=== Additional Considerations
 
-=== Linux File Permissions
+==== &#46;git
+Because we create a linked worktree to an existing repo, `.git` is a file
+that contains a path to the common repo. This might expose sensitive
+information e.g. if serving the directory with a web server. An example `.git`
+created with the publish command contains the following:
+
+ gitdir: /git/example.git/worktrees/example.com
+
+
+==== Linux File Permissions
 The ssh user that you use to connect with git needs to have write permissions
 to both the bare repository and the publish directory. An example setup is
-a `publish` group that has *rwx* permissions to each parent directory:
+a `publish` group that has *rwx* permissions to each parent directory.
+The example below will give the `git` user appropriate permissions to push to a
+repository at `<server>:/srv/git/example.git` and publish files in
+`/srv/publish/example`. Additional users can be granted permissions by adding
+them to the `publish` group.
 
  # mkdir /srv/git /srv/publish
  # groupadd publish
@@ -58,10 +95,11 @@ a `publish` group that has *rwx* permissions to each parent directory:
  # chmod g+w /srv/git /srv/publish
  # usermod -aG publish git
 
-This will give the `git` user appropriate permissions to push to a repository
-at `<server>:/srv/git/example.git` and publish files in `/srv/publish/example`.
-Additional users can be granted permissions by adding them to the `publish` 
-group.
+Alternatively, you could just work in the user's home directory:
+
+ $ mkdir ~/git ~/publish
+
+NOTE: `git publish` requires absolute paths for all arguments that take a path.
 
 
 == Usage
@@ -109,6 +147,7 @@ Let's initialize a publish repository on `example.com`. We'll call it `website`.
 
 === Publish Files to Worktrees
 
+.Publish a repository
 ====
  $ git publish
  Publishing repository: /home/user/website
@@ -130,9 +169,6 @@ Let's initialize a publish repository on `example.com`. We'll call it `website`.
     cf7f00d..3e9a0d8  master -> master
  Published Version: 1
 ====
-
-
-
 
 
 
