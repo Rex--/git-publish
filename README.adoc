@@ -2,141 +2,52 @@
 :link-github: https://github.com/Rex--/git-publish
 :link-docs: https://rex.mckinnon.ninja/git-publish
 
-Publish to remote directories with ease using `git` + `ssh`.
+Publish to remote directories using `git` + `ssh`.
 
-WARNING: This document is *extremely* out of date, especially in reference to
-the usage. The basic concept still applies.
+WARNING: This document is currently a WIP - the information presented may not
+be accurate.
 
+== Quickstart
 
-== Workflow
-The basic workflow this suits is to keep a remote directory in sync with
-one on your local machine. It achieves this by pushing a local repository to a
-remote repository over ssh. This means an intermediate git host such as Github
-is not required. A server hook that fires after a successful push is used to
-trigger a force checkout of the main branch in a separate worktree on  the
-remote server. This worktree is the directory that is kept in sync with the
-local repo.
+. Initialize a _publish repository_. This creates a bare repository on `server`
+at `remote_path` and clones it to `local_path` (default `./<remote_name>`).
 
-.After setup of a remote repository as described in this document
-====
- git clone <server>:/srv/git/example.git
- cd example/
- touch index.html
- git add -A
- git commit -m "Publish Version 1"
- git push
-====
-
-This will publish the files in the current branch to the remote publish
-directory.
+ $ git publish init <server>:<remote_path> [local_path]
 
 
-=== git-publish
-The `publish` git subcommand is a shorthand for the last three commands in the
-example above. It adds all files, increments a version number in the commit
-message, and pushes the current branch to origin. The previous commit is
-required to have a number as the last word in the commit message. The commit
-message is not required to be anything specific, so an initial commit such as
-"Initial Version 0" can be used. The initial commit must contain the starting
-version number, it is not required to be 0. The version number can be changed
-or reset at any time by manually creating a commit containing a number.
+. Add a _publish worktree_. This creates a directory on the publish
+server (default `origin`) that will stay in sync with a branch (default `master`).
 
-.Setting up a local repo for using the publish command
-====
- git clone <server>:/srv/git/example.git
- cd example/
- touch index.html
- git add -A
- git commit -m "Initial Version 0"
- echo "<html><h1>Hello World</h1></html>" > index.html
- git publish    # Publish Version 1
-====
+ $ git publish worktree <remote_path>
 
-.Reset the version to 5
-====
- git add -A
- git commit -m "Reset Version 5"
- # Change some files
- git publish    # Publish Version 6
-====
 
-<<<
+. Edit files, and push to a publish server (default `origin`). An optional
+commit message can be used instead of the default. A custom commit message has
+to be set only once, as if no message is given the last commit message is used.
+
+ $ touch index.html
+ $ git publish [-m "Custom Message"]
+
 
 == Setup
-Configuration is needed on the remote server that you would like to publish to
-set up some post-push hooks and a separate worktree for holding the published
-files.
 
-If you would like to use the `git publish` command, you will need to
-place the git-publish script somewhere it is available on your `$PATH`.
+=== Installing git-publish
+To install the `git publish` command, simply place the script somewhere it is
+available on your $PATH and mark it executable.
 
+ $ cp git-publish ~/.local/bin
+ $ chmod a+x ~/.local/bin/git-publish
 
-=== Remote Configuration
-Some remote configuration is required to install the git hook and setup the
-worktree to serve files from. The ssh user you use to connect with git needs
-to have write permissions to both the bare repository and the publish
-directory. For the following examples, the bare git repo is
-`/srv/git/example.git` and the publish directory is `/srv/www/example.com`.
+Alternatively to stay up-to-date with the latest release, link directly to the git repository. It's recommended to checkout a tag or a commit in this case.
 
-==== Bare Repository
-To create the bare repository on the remote server, use the `--bare` flag. This
-is the repo that you will push to, so take note of the path.
-
- git init --bare /srv/git/example.git
-
-==== Publish Directory
-The directory that stays in sync is referred to as the publish directory. It's
-actually an additional worktree on the bare repository that we set to point to
-our main branch. It can be any directory, not limited by the location of the
-bare repo that you push to. Create the publish directory worktree and point it
-to the master branch:
-
- cd /srv/git/example.git/
- git worktree add /srv/www/example.com master
-
-This will create the directory, init our worktree git files in
-`example.git/worktrees/example.com`, and checkout the latest commit to master.
-
-==== post-receive
-The post receive hook needs to be copied to the `.git/hooks` directory in the
-bare repository. The easiest way to get it there is with scp. On your local
-machine:
-
- scp post-receive <server>:/srv/git/example.git/hooks/
-
-Next, the hook must be edited to publish the correct worktree. Open the script
-in your favorite editor and change `GIT_WORK_TREE` to the publish directory
-path.
-
- nano /srv/git/example.git/hooks/post-receive #GIT_WORK_TREE=/var/www/example.com
- chmod +x /srv/git/example.git/hooks/post-receive
-
-IMPORTANT: The post-receive script must be marked as executable to run!
+.The following example has not been tested
+ $ git checkout --detach master
+ $ ln -s git-publish ~/.local/bin
+ $ chmod a+x git-publish
 
 
-=== Local Configuration
-No local configuration is required to publish to the remote server. Files can
-be added, committed, and pushed as normal. To push to the remote repository,
-it must be accessible over ssh(or another protocol).
 
-Clone the remote repo:
-
- git clone <server>:/srv/git/example.git
-
-or add to an existing one:
-
- git remote add origin <server>:/srv/git/example.git
-
-==== git-publish
-If you would like to use the `git publish` command, copy it to a folder on your
-`$PATH`. I like `~/.local/bin`.
-
- cp git-publish ~/.local/bin
-
-
-== Additional Considerations
-
-=== Linux file permissions
+=== Linux File Permissions
 The ssh user that you use to connect with git needs to have write permissions
 to both the bare repository and the publish directory. An example setup is
 a `publish` group that has *rwx* permissions to each parent directory:
@@ -152,21 +63,129 @@ at `<server>:/srv/git/example.git` and publish files in `/srv/publish/example`.
 Additional users can be granted permissions by adding them to the `publish` 
 group.
 
-=== Drawbacks
 
-&#46;git::
-Because we create an additional worktree for an existing repo, `.git` is a file
-that contains a path to the bare repo. This might expose sensitive information
-e.g. if serving the directory with a web server. The example `.git` created
-above contains the following:
+== Usage
+The basic workflow this suits is to keep a remote directory in sync with
+one on your local machine. It achieves this by pushing a local repository to a
+remote repository over ssh. This means an intermediate git host such as Github
+is not required. A server hook that fires after a successful push is used to
+trigger a force checkout of the main branch in a separate worktree on  the
+remote server. This worktree is the directory that is kept in sync with the
+local repo.
 
- gitdir: /srv/git/example.git/worktrees/example.com
+=== Initialize Publish Repository
+When you initialize a repository with the `git publish init` command, it does
+two main things:
 
+1. Creates a bare repository on the given host and installs a post-receive hook.
+2. Initializes a local repository and adds the remote as origin.
+
+Let's initialize a publish repository on `example.com`. We'll call it `website`.
+
+.Initializing a publish repository
+====
+ $ git publish init example.com:/git/website.git
+ Connecting to server: example.com
+ Repo: /git/website.git
+ user@example.com's password: 
+ Initialized empty Git repository in /git/website.git/
+ Find this repo at: example.com:/git/website.git
+ Cloning into local directory: website/
+ Initialized empty Git repository in /home/user/website/.git/
+====
+
+=== Add Publish Directory
+
+.Add a publish worktree
+====
+$ git publish worktree /www/example.com
+Using remote 'origin' @ example.com:/git/website.git
+Creating publish worktree: /www/example.com
+user@example.com's password: 
+Preparing worktree (detached HEAD cf7f00d)
+HEAD is now at cf7f00d Publish Version 0
+Successfully created worktree: /www/example.com
+====
+
+=== Publish Files to Worktrees
+
+====
+ $ git publish
+ Publishing repository: /home/user/website
+ Using last commit message: Publish Version 0
+ Incrementing commit version: 0 + 1
+ [master 3e9a0d8] Publish Version 1
+  1 file changed, 0 insertions(+), 0 deletions(-)
+  create mode 100644 index.html
+ user@example.com's password: 
+ Enumerating objects: 3, done.
+ Counting objects: 100% (3/3), done.
+ Delta compression using up to 4 threads
+ Compressing objects: 100% (2/2), done.
+ Writing objects: 100% (2/2), 259 bytes | 259.00 KiB/s, done.
+ Total 2 (delta 0), reused 0 (delta 0), pack-reused 0
+ remote: Updating worktree: /www/example.com
+ remote: HEAD is now at 3e9a0d8 Publish Version 1
+ To localhost:/git/website.git
+    cf7f00d..3e9a0d8  master -> master
+ Published Version: 1
+====
+
+
+
+
+
+
+== Reference
+
+[.big]#`git publish [init|worktree] [-d] [-r remote] [-b branch] [-m message] [files|server:remote_path|remote_path] [local_path]`#::
+All commands accept some common configuration options in case you'd like to
+change the defaults. All dashed arguments should come *before* any positional
+arguments and *after* the subcommand.
+
+[horizontal]
+    `-r remote`::: The name of the remote to perform the publish operation on.
+    (Default `origin`)
+    `-b branch`::: The name of the branch to perform the operation on.
+    (Default `master` or `init.defaultBranch` if set)
+
+//-
+
+[.big]#`git publish [-r] [-b] [-m message] [files]`#::
+Publish files to a remote server. When run with no arguments, this publishes
+all files in the directory to `origin/master`. Any worktrees that have been
+created on `origin` will be updated.
+
+[horizontal]
+    `files`::: List of files to publish. (Default: `-A`)
+    `-m message`::: Commit message to use. If no version is found in the
+    message, one will be appended to the end. (Default: Last commit if exists,
+    else "Publish Version")
+
+//-
+
+[.big]#`git publish init [-r] [-b] server:remote_path [local_path]`#::
+Initialize a repository on the `server` at `remote_path` and link it with
+`local_path`.
+
+[horizontal]
+    `server`::: Remote server uri. Accepts `[user@]host` and
+    `ssh://[user@]host[:port]` formats.
+    `remote_path`::: Path of the bare git repository on `server`.
+    e.g. `/git/something-like.git`
+    `[local_path]`::: Optional path to the local repository. (Default: Create a
+    directory with the remote repository's name e.g. `./something-like/`)
+
+//-
+
+[.big]#`git publish worktree [-r] [-b] [-d] remote_path`#::
+Create a new worktree at `remote_path` that gets updated on every push.
+
+[horizontal]
+    `remote_path`::: Path of new worktree on the remote.
+    `-d`::: Delete `remote_path` instead of creating it.
 
 ---
-
-More coming soon!
-
 [.text-center]
 [.big]#{link-github}[github] | {link-docs}[documentation]# +
-[.big]#&copy; 2022 Rex McKinnon# +
+&copy; 2022 Rex McKinnon
