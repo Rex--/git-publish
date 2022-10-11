@@ -98,13 +98,13 @@ Let's initialize a publish repository on `example.com`. We'll call it `website`.
 
 .Add a publish worktree
 ====
-$ git publish worktree /www/example.com
-Using remote 'origin' @ example.com:/git/website.git
-Creating publish worktree: /www/example.com
-user@example.com's password: 
-Preparing worktree (detached HEAD cf7f00d)
-HEAD is now at cf7f00d Publish Version 0
-Successfully created worktree: /www/example.com
+ $ git publish worktree /www/example.com
+ Using remote 'origin' @ example.com:/git/website.git
+ Creating publish worktree: /www/example.com
+ user@example.com's password: 
+ Preparing worktree (detached HEAD cf7f00d)
+ HEAD is now at cf7f00d Publish Version 0
+ Successfully created worktree: /www/example.com
 ====
 
 === Publish Files to Worktrees
