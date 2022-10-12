@@ -102,6 +102,31 @@ Alternatively, you could just work in the user's home directory:
 NOTE: `git publish` requires absolute paths for all arguments that take a path.
 
 
+==== SSH Host
+The publish server is required to be accessible over ssh. This means we have to
+authenticate with it somehow, however, most of the time it is recommend to
+disable password logins for security. The easiest way to authenticate using a
+key pair is by installing the needed key to your `ssh-agent`. This also means
+you won't have to type in any passwords to login to the publish server.
+
+Sometimes, you may not have an ssh-agent running or maybe you are running the
+server on a non-standard port. These situations require you to configure the
+ssh connection. The current recommended way to do this is by editing
+`~/.ssh/config` and configuring a custom hostname for your ssh server. An
+example of one such host is given below:
+
+ Host <custom-host>
+     Hostname       <ip>
+     Port           <port>
+     User           <user>
+     IdentityFile   <path/to/private_key>
+
+All configuration options are optional, just use what you need to change from
+the defaults. You can now use `<custom-host>` as a hostname like:
+
+ git publish init <custom-host>:/path/to/repo.git
+
+
 == Usage
 The basic workflow this suits is to keep a remote directory in sync with
 one on your local machine. It achieves this by pushing a local repository to a

@@ -147,7 +147,7 @@ find -name \\\"*.publish\\\" -exec sh \\\"{}\\\" \\\";\\\""
         if [ "$2" ]; then
             PUBLISH_LOCAL=$2
         else
-            PUBLISH_LOCAL="$(basename "$PUBLISH_REPO" | cut -d. -f1)"
+            PUBLISH_LOCAL="$(basename "$PUBLISH_REPO" ".git")"
         fi
         echo "Cloning into local directory: $PUBLISH_LOCAL/"
         # Create local repo and link it to the remote
