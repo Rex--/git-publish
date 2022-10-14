@@ -1,12 +1,17 @@
 = git-publish
 :link-github: https://github.com/Rex--/git-publish/tree/dev
 :link-docs: https://rex.mckinnon.ninja/git-publish-dev
+:link-docs-og: https://rex.mckinnon.ninja/git-publish
 :icons: font
+:toc: left
 
 Publish to remote directories using `git` + `ssh`.
 
 WARNING: This document is currently a WIP - the information presented may not
 be accurate.
+
+NOTE: This documentation is for the development version. It is functional, but
+has not been tested very hard. Checkout the original version {link-docs-og}[here.]
 
 == Quickstart
 

@@ -1,0 +1,162 @@
+'\" t
+.\"     Title: git-publish
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.17
+.\"      Date: 2022-10-14
+.\"    Manual: Git-publish Manual
+.\"    Source: git-publish v0.0.1
+.\"  Language: English
+.\"
+.TH "GIT\-PUBLISH" "1" "2022-10-14" "git\-publish v0.0.1" "Git\-publish Manual"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+git-publish \- Publish files to remote directories using git + ssh.
+.SH "SYNOPSIS"
+.sp
+\fBgit publish [init|worktree] [\-r remote] [\-b branch] [\-m message]
+[files|server:remote_path|remote_path] [local_path]\fP
+.sp
+\fBgit publish [\-r] [\-b] [\-m message] [files]\fP
+.br
+\fBgit publish init [\-r] [\-b] server:remote_path [local_path]\fP
+.br
+\fBgit publish worktree [\-r] [\-b] [\-d] remote_path\fP
+.br
+.SH "COMMANDS"
+.sp
+\fBpublish\fP
+.RS 4
+Publish \fIfiles\fP to \fI<remote>/<branch>\fP. Any worktrees that have been created on
+\fIorigin\fP will be updated.
+.sp
+\fBfiles\fP
+.RS 4
+List of files to publish. (Default: \fIAll files: \-A\fP)
+.RE
+.RE
+.sp
+\fBpublish init\fP
+.RS 4
+Initialize a repository on the \fIserver\fP at \fIremote_path\fP and link it with
+\fIlocal_path\fP.
+.sp
+\fBserver\fP
+.RS 4
+Remote server uri. Accepts \fI[user@]host\fP and
+\fIssh://[user@]host[:port]\fP formats.
+.RE
+.sp
+\fBremote_path\fP
+.RS 4
+Path of the bare git repository on \fIserver\fP.
+e.g. \fI/git/something\-like.git\fP
+.RE
+.sp
+\fB[local_path]\fP
+.RS 4
+Optional path to the local repository. (Default: Create a
+directory with the remote repository\(cqs name e.g. \fI./something\-like/\fP)
+.RE
+.RE
+.sp
+\fBpublish worktree\fP
+.RS 4
+Create a new worktree on \fI<remote>\fP at \fIremote_path\fP that gets updated on every
+push to \fI<branch>\fP. If the \-d flag is specified, delete an existing worktree.
+.sp
+\fBremote_path\fP
+.RS 4
+Path of new worktree on the remote.
+.RE
+.RE
+.SH "OPTIONS"
+.sp
+All commands accept some common configuration options in case you\(cqd like to
+change the defaults. All dashed arguments should come \fIbefore\fP any positional
+arguments and \fIafter\fP the subcommand.
+.sp
+\fB\-r remote\fP
+.RS 4
+The name of the remote to perform the publish operation on.
+(Default \fIorigin\fP)
+.RE
+.sp
+\fB\-b branch\fP
+.RS 4
+The name of the branch to perform the publish operation on.
+(Default \fImaster\fP or \fIinit.defaultBranch\fP if set)
+.RE
+.sp
+\fB\-m message\fP
+.RS 4
+Commit message to use. If no version is found in the message,
+one will be appended to the end. (Default: Last commit if exists, else
+"Publish Version")
+.RE
+.sp
+\fB\-d\fP
+.RS 4
+Performs a delete operation instead of the default.
+.RE
+.SH "EXIT STATUS"
+.sp
+\fB0\fP
+.RS 4
+Success.
+.br
+The program thinks everything was successful (you be the judge).
+.RE
+.sp
+\fB1\fP
+.RS 4
+Error.
+.br
+An error occurred, probably an invalid argument or git operation.
+.RE
+.SH "RESOURCES"
+.sp
+This man page is sparsely updated, checkout the documentation online for the
+latest up\-to\-date version.
+.sp
+\fBDocumentation\fP
+.RS 4
+Documentation with examples is available on my website:
+.URL "https://rex.mckinnon.ninja/git\-publish" "" ""
+.RE
+.sp
+\fBSource\fP
+.RS 4
+The source code is available on github: \c
+.URL "https://github.com/rex\-\-/git\-publish" "" ""
+.RE
+.sp
+\fBManual\fP
+.RS 4
+This man page is available online: \c
+.URL "https://rex.mckinnon.ninja/git\-publish\-manual" "" ""
+.RE
+.SH "COPYING"
+.sp
+Copyright \(co 2022 Rex McKinnon \c
+.MTO "0xff\(atrexploits.com" "" ""
+.br
+This software is available for free under the permissive University of
+Illinois/NCSA Open Source License. See the LICENSE file for full details.
