@@ -2,12 +2,12 @@
 .\"     Title: git-publish
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.17
-.\"      Date: 2022-10-20
+.\"      Date: 2022-10-21
 .\"    Manual: Git-publish Manual
 .\"    Source: git-publish v0.0.1
 .\"  Language: English
 .\"
-.TH "GIT\-PUBLISH" "1" "2022-10-20" "git\-publish v0.0.1" "Git\-publish Manual"
+.TH "GIT\-PUBLISH" "1" "2022-10-21" "git\-publish v0.0.1" "Git\-publish Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -70,6 +70,13 @@ Note that all \fIremote_path\fP arguments \fBMUST\fP be absolute paths.
 Publish \fIfiles\fP to \fI<remote>/<branch>\fP. Any worktrees that have been created on
 \fIorigin\fP will be updated.
 .sp
+\fB\-m message\fP
+.RS 4
+Commit message to use. If no version is found in the message,
+one will be appended to the end. (Default: Last commit if exists, else
+"Publish Version")
+.RE
+.sp
 \fBfiles\fP
 .RS 4
 List of files to publish. (Default: \fI\-A\fP All files)
@@ -80,13 +87,6 @@ List of files to publish. (Default: \fI\-A\fP All files)
 .RS 4
 Initialize a repository on \fIhost\fP at \fIremote_path\fP and link it with
 \fIlocal_path\fP.
-.sp
-\fB\-m message\fP
-.RS 4
-Commit message to use. If no version is found in the message,
-one will be appended to the end. (Default: Last commit if exists, else
-"Publish Version")
-.RE
 .sp
 \fBhost\fP
 .RS 4

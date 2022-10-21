@@ -46,14 +46,14 @@ Note that all _remote_path_ arguments *MUST* be absolute paths.
 *publish*::
     Publish _files_ to _<remote>/<branch>_. Any worktrees that have been created on
     _origin_ will be updated.
+    *-m message*::: Commit message to use. If no version is found in the message,
+        one will be appended to the end. (Default: Last commit if exists, else
+        "Publish Version")
     *files*::: List of files to publish. (Default: _-A_ All files)
 
 *publish init*::
     Initialize a repository on _host_ at _remote_path_ and link it with
     _local_path_.
-    *-m message*::: Commit message to use. If no version is found in the message,
-        one will be appended to the end. (Default: Last commit if exists, else
-        "Publish Version")
     *host*::: Remote host url. Accepts _[user@]host_ and
         _ssh://[user@]host[:port]_ formats.
     *remote_path*::: Absolute path of the bare git repository on _host_.

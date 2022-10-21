@@ -14,9 +14,17 @@ this document {link-docs-og}[here].
 == Quickstart
 
 . **Init**ialize a _publish repository_. This creates a bare repository on `host`
-at `remote_path` and clones it to `local_path` (default `./<remote_name>`).
+at `remote_path` and clones it to `local_path` (default `./<remote_name>`). It
+also creates an initial commit with the message 'Init Version 0'.
 
  $ git publish init <host>:<remote_path> [local_path]
+
+
+. Add a _publish **worktree**_. This creates a directory on the publish
+server (default `origin`) that will stay in sync with a branch (default `master`
+or `init.defaultBranch` if set).
+
+ $ git publish worktree <remote_path> [local_path]
 
 
 . Edit files, and *_publish_* to a remote repository (default `origin`). An optional
@@ -28,24 +36,14 @@ with an incremented version number.
  $ git publish [-m "Custom Message"]
 
 
-. Add a _publish **worktree**_. This creates a directory on the publish
-server (default `origin`) that will stay in sync with a branch (default `master`
-or `init.defaultBranch` if set).
-
- $ git publish worktree <remote_path> [local_path]
-
-NOTE: Currently you cannot create any publish worktrees until you have pushed
-at least one commit.
-
-
 
 == Setup
-Currently, `git-publish` and it's required programs have to be installed
-manually.
+Currently, the required software has to be installed manually. +
+A install script is provided to install `git-publish` and it's documentation.
 
 === Requirements
-A few common programs are required to use `git-publish`. They can typically be
-installed with your distro's package manager.
+Only a few common programs are required to use `git-publish`. They can
+typically be installed with your distro's package manager.
 
 `git`::
 git is required for, well, the `git` command. It's required to be installed on
@@ -63,8 +61,37 @@ to run in other shells. Because of this, `bash` is listed as a requirement,
 however it may work in others.
 
 === Installing git-publish
-To install the `git publish` command, simply place the script somewhere it is
-available on your $PATH and mark it executable.
+
+==== Installation script
+An installation script is provided that copies the needed files to the
+appropriate directories. You can run this script with make using `make install`
+or run the script independently with `./install.sh`.
+
+The script will prompt for you to choose a directory on your $PATH to copy the
+`git-publish` script to. It will the copy the `git-publish.1` man page to the
+first path returned from the `manpath` command. You will need write access to
+both directories!
+
+.Running the install.sh script
+ $ sudo make install
+ [sudo] password for user:
+ Select an install directory on your $PATH:
+  (1) /usr/local/bin [default]
+  (2) /usr/bin
+  (3) /bin
+  (4) /usr/local/sbin
+  (5) /usr/lib/jvm/default/bin
+  (6) /opt/microchip/xc8/v2.40/bin
+  (7) /home/user/.local/bin/
+ Input a number (enter for default): 
+ Installing 'git-publish' to '/usr/local/bin' -- success
+ Installing 'docs/git-publish.1' to '/usr/local/man' -- success
+ Successfully installed git-publish.
+
+
+==== Manual Installation
+To install the `git publish` command manually, simply place the script
+somewhere it is available on your $PATH and mark it executable.
 
  $ cp git-publish ~/.local/bin
  $ chmod a+x ~/.local/bin/git-publish
@@ -72,7 +99,7 @@ available on your $PATH and mark it executable.
 Alternatively to stay up-to-date with the latest release, link directly to the
 git repository. It's recommended to checkout a tag or a commit in this case.
 
-.The following has not been testedw
+.The following has not been tested
  $ git checkout --detach master
  $ ln -s git-publish ~/.local/bin
  $ chmod a+x git-publish
@@ -164,6 +191,14 @@ Let's initialize a publish repository on `example.com`. We'll call it `website`.
  Find this repo at: example.com:/git/website.git
  Cloning into local directory: website/
  Initialized empty Git repository in /home/user/website/.git/
+ [master (root-commit) aa3d154] Init Version 0
+ user@example.com's password: 
+ Enumerating objects: 2, done.
+ Counting objects: 100% (2/2), done.
+ Writing objects: 100% (2/2), 170 bytes | 170.00 KiB/s, done.
+ Total 2 (delta 0), reused 0 (delta 0), pack-reused 0
+ To example.com:/git/website.git
+  * [new branch]      master -> master
 ====
 
 This created two repositories: `/git/website.git` on our server and
@@ -172,7 +207,9 @@ This created two repositories: `/git/website.git` on our server and
 Inside of our local repo, if we run `git remote get-url origin` (or whatever
 you set the remote to be) we can see it is set up to push/pull from
 `example.com:/git/website.git`. The git-publish command just runs a `git init`
-and then `git remote add` to setup the local repository.
+and then `git remote add` to setup the local repository. It then creates an
+empty commit and pushes it to the remote. This empty commit can be viewed as
+the 'creation' commit.
 
 In our server repo, the only interesting thing you will find is a shell script
 `post-receive` that gets installed in `<repo>/hooks/` --
@@ -190,7 +227,7 @@ bare repository is bog standard.
  Creating publish worktree: /www/example.com
  user@example.com's password: 
  Preparing worktree (detached HEAD cf7f00d)
- HEAD is now at cf7f00d Publish Version 0
+ HEAD is now at cf7f00d Init Version 0
  Successfully created worktree: /www/example.com
 ====
 
@@ -200,8 +237,8 @@ bare repository is bog standard.
 ====
  $ git publish
  Publishing repository: /home/user/website
- Using last commit message: Publish Version 0
- Incrementing commit version: 0 + 1
+ Using default commit message: Publish Version
+ Using default version: 1
  [master 3e9a0d8] Publish Version 1
   1 file changed, 0 insertions(+), 0 deletions(-)
   create mode 100644 index.html
