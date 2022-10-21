@@ -7,11 +7,9 @@
 
 Publish to remote directories using `git` + `ssh`.
 
-WARNING: This document is currently a WIP - the information presented may not
-be accurate.
-
-NOTE: This documentation is for the development version. It is functional, but
-has not been tested very hard. Checkout the original version {link-docs-og}[here.]
+WARNING: This document is for the dev version and as such is a WIP -- some
+information may be missing or inaccurate. You can find the original version of
+this document {link-docs-og}[here].
 
 == Quickstart
 
@@ -135,7 +133,7 @@ example of one such host is given below:
 All configuration options are optional, just use what you need to change from
 the defaults. You can now use `<custom-host>` as a hostname like:
 
- git publish init <custom-host>:/path/to/repo.git
+ $ git publish init <custom-host>:/path/to/repo.git
 
 
 == Usage
