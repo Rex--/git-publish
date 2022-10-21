@@ -1,4 +1,4 @@
-= git-publish
+= git-publish documentation
 :link-github: https://github.com/Rex--/git-publish/tree/dev
 :link-docs: https://rex.mckinnon.ninja/git-publish-dev
 :link-docs-og: https://rex.mckinnon.ninja/git-publish
@@ -15,24 +15,30 @@ has not been tested very hard. Checkout the original version {link-docs-og}[here
 
 == Quickstart
 
-. Initialize a _publish repository_. This creates a bare repository on `server`
+. **Init**ialize a _publish repository_. This creates a bare repository on `host`
 at `remote_path` and clones it to `local_path` (default `./<remote_name>`).
 
- $ git publish init <server>:<remote_path> [local_path]
+ $ git publish init <host>:<remote_path> [local_path]
 
 
-. Add a _publish worktree_. This creates a directory on the publish
-server (default `origin`) that will stay in sync with a branch (default `master`).
-
- $ git publish worktree <remote_path>
-
-
-. Edit files, and push to a publish server (default `origin`). An optional
+. Edit files, and *_publish_* to a remote repository (default `origin`). An optional
 commit message can be used instead of the default. A custom commit message has
-to be set only once, as if no message is given the last commit message is used.
+to be set only once, as if no message is given the last commit message is used
+with an incremented version number.
 
  $ touch index.html
  $ git publish [-m "Custom Message"]
+
+
+. Add a _publish **worktree**_. This creates a directory on the publish
+server (default `origin`) that will stay in sync with a branch (default `master`
+or `init.defaultBranch` if set).
+
+ $ git publish worktree <remote_path> [local_path]
+
+NOTE: Currently you cannot create any publish worktrees until you have pushed
+at least one commit.
+
 
 
 == Setup
@@ -136,10 +142,10 @@ the defaults. You can now use `<custom-host>` as a hostname like:
 The basic workflow this suits is to keep a remote directory in sync with
 one on your local machine. It achieves this by pushing a local repository to a
 remote repository over ssh. This means an intermediate git host such as Github
-is not required. A server hook that fires after a successful push is used to
-trigger a force checkout of the main branch in a separate worktree on  the
-remote server. This worktree is the directory that is kept in sync with the
-local repo.
+is not required. A git server hook that fires after a successful push is used
+to trigger a force checkout of the main branch for every published worktree
+on the server. These worktree directories contain a copy of the latest
+committed files.
 
 === Initialize Publish Repository
 When you initialize a repository with the `git publish init` command, it does
@@ -161,6 +167,21 @@ Let's initialize a publish repository on `example.com`. We'll call it `website`.
  Cloning into local directory: website/
  Initialized empty Git repository in /home/user/website/.git/
 ====
+
+This created two repositories: `/git/website.git` on our server and
+`website/.git` on our local machine.
+
+Inside of our local repo, if we run `git remote get-url origin` (or whatever
+you set the remote to be) we can see it is set up to push/pull from
+`example.com:/git/website.git`. The git-publish command just runs a `git init`
+and then `git remote add` to setup the local repository.
+
+In our server repo, the only interesting thing you will find is a shell script
+`post-receive` that gets installed in `<repo>/hooks/` --
+`example.git/hooks/post-receive` in the case of the example above. This script,
+which runs after a successful push, simply finds all *.publish files in the
+hooks/ directory and executes them. Other than this simple one-line script, the
+bare repository is bog standard.
 
 === Add Publish Directory
 
@@ -195,61 +216,17 @@ Let's initialize a publish repository on `example.com`. We'll call it `website`.
  Total 2 (delta 0), reused 0 (delta 0), pack-reused 0
  remote: Updating worktree: /www/example.com
  remote: HEAD is now at 3e9a0d8 Publish Version 1
- To localhost:/git/website.git
+ To example.com:/git/website.git
     cf7f00d..3e9a0d8  master -> master
  Published Version: 1
 ====
 
 
 
-== Reference
+// == git-publish(1)
+include::git-publish-man.adoc[leveloffset=+1]
 
-[.big]#`git publish [init|worktree] [-d] [-r remote] [-b branch] [-m message] [files|server:remote_path|remote_path] [local_path]`#::
-All commands accept some common configuration options in case you'd like to
-change the defaults. All dashed arguments should come *before* any positional
-arguments and *after* the subcommand.
 
-[horizontal]
-    `-r remote`::: The name of the remote to perform the publish operation on.
-    (Default `origin`)
-    `-b branch`::: The name of the branch to perform the operation on.
-    (Default `master` or `init.defaultBranch` if set)
-
-//-
-
-[.big]#`git publish [-r] [-b] [-m message] [files]`#::
-Publish files to a remote server. When run with no arguments, this publishes
-all files in the directory to `origin/master`. Any worktrees that have been
-created on `origin` will be updated.
-
-[horizontal]
-    `files`::: List of files to publish. (Default: `-A`)
-    `-m message`::: Commit message to use. If no version is found in the
-    message, one will be appended to the end. (Default: Last commit if exists,
-    else "Publish Version")
-
-//-
-
-[.big]#`git publish init [-r] [-b] server:remote_path [local_path]`#::
-Initialize a repository on the `server` at `remote_path` and link it with
-`local_path`.
-
-[horizontal]
-    `server`::: Remote server uri. Accepts `[user@]host` and
-    `ssh://[user@]host[:port]` formats.
-    `remote_path`::: Path of the bare git repository on `server`.
-    e.g. `/git/something-like.git`
-    `[local_path]`::: Optional path to the local repository. (Default: Create a
-    directory with the remote repository's name e.g. `./something-like/`)
-
-//-
-
-[.big]#`git publish worktree [-r] [-b] [-d] remote_path`#::
-Create a new worktree at `remote_path` that gets updated on every push.
-
-[horizontal]
-    `remote_path`::: Path of new worktree on the remote.
-    `-d`::: Delete `remote_path` instead of creating it.
 
 ---
 [.text-center]

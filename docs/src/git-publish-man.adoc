@@ -4,43 +4,26 @@
 :mansource: git-publish v0.0.1
 :link-git-publish-docs: https://rex.mckinnon.ninja/git-publish
 :link-git-publish-github: https://github.com/rex--/git-publish
-:link-git-publish-man: https://rex.mckinnon.ninja/git-publish-manual
+:link-git-publish-man: https://rex.mckinnon.ninja/git-publish#_git_publish1
 
+
+// We only include the NAME section if we're generating an
+// actual man page.
+ifeval::["{backend}" == "manpage"]
 == Name
 
-git-publish - Publish files to remote directories using git + ssh.
+git-publish - Publish to remote directories using git + ssh.
+endif::[]
 
 == Synopsis
 
 *git publish [init|worktree] [-r remote] [-b branch] [-m message]
-[files|server:remote_path|remote_path] [local_path]*
+[files|host:remote_path|remote_path] [local_path]*
 
 *git publish [-r] [-b] [-m message] [files]* +
-*git publish init [-r] [-b] server:remote_path [local_path]* +
+*git publish init [-r] [-b] host:remote_path [local_path]* +
 *git publish worktree [-r] [-b] [-d] remote_path* +
 
-
-== Commands
-
-*publish*::
-    Publish _files_ to _<remote>/<branch>_. Any worktrees that have been created on
-    _origin_ will be updated.
-    *files*::: List of files to publish. (Default: _All files: -A_)
-
-*publish init*::
-    Initialize a repository on the _server_ at _remote_path_ and link it with
-    _local_path_.
-    *server*::: Remote server uri. Accepts _[user@]host_ and
-    _ssh://[user@]host[:port]_ formats.
-    *remote_path*::: Path of the bare git repository on _server_.
-    e.g. _/git/something-like.git_
-    *[local_path]*::: Optional path to the local repository. (Default: Create a
-    directory with the remote repository's name e.g. _./something-like/_)
-
-*publish worktree*::
-    Create a new worktree on _<remote>_ at _remote_path_ that gets updated on every
-    push to _<branch>_. If the -d flag is specified, delete an existing worktree.
-    *remote_path*::: Path of new worktree on the remote.
 
 == Options
 All commands accept some common configuration options in case you'd like to
@@ -53,11 +36,36 @@ arguments and _after_ the subcommand.
 *-b branch*:: The name of the branch to perform the publish operation on.
     (Default _master_ or _init.defaultBranch_ if set)
 
-*-m message*:: Commit message to use. If no version is found in the message,
-    one will be appended to the end. (Default: Last commit if exists, else
-    "Publish Version")
 
-*-d*:: Performs a delete operation instead of the default.
+== Commands
+When run with no arguments, it will publish all files in the repository to
+_<remote>/<branch>_. Any worktrees that are on _<remote>_ and are configured to
+track _<branch>_ will get updated. +
+Note that all _remote_path_ arguments *MUST* be absolute paths.
+
+*publish*::
+    Publish _files_ to _<remote>/<branch>_. Any worktrees that have been created on
+    _origin_ will be updated.
+    *files*::: List of files to publish. (Default: _-A_ All files)
+
+*publish init*::
+    Initialize a repository on _host_ at _remote_path_ and link it with
+    _local_path_.
+    *-m message*::: Commit message to use. If no version is found in the message,
+        one will be appended to the end. (Default: Last commit if exists, else
+        "Publish Version")
+    *host*::: Remote host url. Accepts _[user@]host_ and
+        _ssh://[user@]host[:port]_ formats.
+    *remote_path*::: Absolute path of the bare git repository on _host_.
+        e.g. _/git/something-like.git_
+    *local_path*::: Optional path to the local repository. (Default: Create a
+        directory with the remote repository's name e.g. _./something-like/_)
+
+*publish worktree*::
+    Create a new worktree on _<remote>_ at _remote_path_ that gets updated on every
+    push to _<branch>_. If the -d flag is specified, delete an existing worktree.
+    *-d*::: Delete an existing worktree instead of creating a new one.
+    *remote_path*::: Absolute path of worktree on the remote.
 
 == Exit status
 
@@ -67,12 +75,15 @@ arguments and _after_ the subcommand.
 *1*:: Error. +
     An error occurred, probably an invalid argument or git operation.
 
-== Resources
-This man page is sparsely updated, checkout the documentation online for the
-latest up-to-date version.
 
-*Documentation*:: Documentation with examples is available on my website:
-    {link-git-publish-docs}
+// We only include the RESOURCES and COPYING sections if we're generating an
+// actual man page.
+ifeval::["{backend}" == "manpage"]
+
+== Resources
+Checkout the documentation for examples and more information about usages.
+
+*Documentation*:: Documentation is available online: {link-git-publish-docs}
 
 *Source*:: The source code is available on github: {link-git-publish-github}
 
@@ -80,6 +91,8 @@ latest up-to-date version.
 
 
 == Copying
-Copyright (C) 2022 Rex McKinnon <0xff@rexploits.com> +
+Copyright (C) 2022 Rex McKinnon +
 This software is available for free under the permissive University of
 Illinois/NCSA Open Source License. See the LICENSE file for full details.
+
+endif::[]

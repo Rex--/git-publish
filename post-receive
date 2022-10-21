@@ -1,4 +1,0 @@
-#!/bin/sh
-# This simple post-receive hook executes all .publish hooks in the current
-# directory.
-find -name "*.publish" -exec sh "{}" ";"
