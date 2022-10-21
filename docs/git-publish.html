@@ -454,7 +454,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_usage">Usage</a>
 <ul class="sectlevel2">
 <li><a href="#_initialize_publish_repository">Initialize Publish Repository</a></li>
-<li><a href="#_add_publish_directory">Add Publish Directory</a></li>
+<li><a href="#_create_publish_worktree">Create Publish Worktree</a></li>
 <li><a href="#_publish_files_to_worktrees">Publish Files to Worktrees</a></li>
 </ul>
 </li>
@@ -641,7 +641,7 @@ created with the publish command contains the following:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>gitdir: /git/example.git/worktrees/example.com</pre>
+<pre>gitdir: /git/website.git/worktrees/example</pre>
 </div>
 </div>
 </div>
@@ -740,7 +740,7 @@ committed files.</p>
 <h3 id="_initialize_publish_repository">Initialize Publish Repository</h3>
 <div class="paragraph">
 <p>When you initialize a repository with the <code>git publish init</code> command, it does
-two main things:</p>
+three main things:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -749,6 +749,9 @@ two main things:</p>
 </li>
 <li>
 <p>Initializes a local repository and adds the remote as origin.</p>
+</li>
+<li>
+<p>Creates an empty commit and pushes it to the configured branch.</p>
 </li>
 </ol>
 </div>
@@ -789,45 +792,77 @@ To example.com:/git/website.git
 you set the remote to be) we can see it is set up to push/pull from
 <code>example.com:/git/website.git</code>. The git-publish command just runs a <code>git init</code>
 and then <code>git remote add</code> to setup the local repository. It then creates an
-empty commit and pushes it to the remote. This empty commit can be viewed as
-the 'creation' commit.</p>
+empty commit and pushes it to the remote with the message 'Init Version 0'.
+This empty commit can be viewed as the 'creation' commit.</p>
 </div>
 <div class="paragraph">
 <p>In our server repo, the only interesting thing you will find is a shell script
-<code>post-receive</code> that gets installed in <code>&lt;repo&gt;/hooks/</code>&#8201;&#8212;&#8201;<code>example.git/hooks/post-receive</code> in the case of the example above. This script,
+<code>post-receive</code> that gets installed in <code>&lt;repo&gt;/hooks/</code> e.g.
+<code>example.git/hooks/post-receive</code> in the case of the example above. This script,
 which runs after a successful push, simply finds all *.publish files in the
 hooks/ directory and executes them. Other than this simple one-line script, the
 bare repository is bog standard.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_add_publish_directory">Add Publish Directory</h3>
+<h3 id="_create_publish_worktree">Create Publish Worktree</h3>
+<div class="paragraph">
+<p>The worktree(s) that hold the actual published files are created with the
+<code>git publish worktree</code> command.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s create a publish worktree on <code>example.com</code> at <code>/var/www/website/</code>. Note
+how we don&#8217;t have to specify a host like <code>example.com</code>, it is extracted from
+the configured remote (default <code>origin</code>).</p>
+</div>
 <div class="exampleblock">
-<div class="title">Example 2. Add a publish worktree</div>
+<div class="title">Example 2. Create a publish worktree</div>
 <div class="content">
 <div class="literalblock">
 <div class="content">
-<pre>$ git publish worktree /www/example.com
+<pre>$ git publish worktree /var/www/example
 Using remote 'origin' @ example.com:/git/website.git
-Creating publish worktree: /www/example.com
+Creating publish worktree: /var/www/example
 user@example.com's password:
 Preparing worktree (detached HEAD cf7f00d)
 HEAD is now at cf7f00d Init Version 0
-Successfully created worktree: /www/example.com</pre>
+Successfully created worktree: /var/www/example</pre>
 </div>
 </div>
 </div>
+</div>
+<div class="paragraph">
+<p>This created a new linked worktree at <code>/var/www/example</code> and checked out the
+latest commit in the configured branch. If you haven&#8217;t yet published any files,
+the directory will be empty except for the <code>.git</code> <em>file</em>. Refer to the
+<a href="#_git">.git section</a> in <a href="#_additional_considerations">Additional Considerations</a> for info about this file.</p>
+</div>
+<div class="paragraph">
+<p>This command also places a <code>.publish</code> script into the common repository&#8217;s
+<code>hook/</code> directory. This script contains the worktree path and the branch to
+stay up-to-date with. The file is named after the worktree path, so the
+example worktree&#8217;s script would be <code>var-www-example.publish</code>. This script gets
+run on every successful push and checks out the latest commit in the configured
+branch. There is currently no way to change the branch a worktree tracks.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_publish_files_to_worktrees">Publish Files to Worktrees</h3>
+<div class="paragraph">
+<p>Files are published to remote worktrees with the <code>git publish</code> command. Most of
+the time, no arguments are required.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s publish an <code>index.html</code> to our <code>/var/www/example/</code>.</p>
+</div>
 <div class="exampleblock">
-<div class="title">Example 3. Publish a repository</div>
+<div class="title">Example 3. Publish a file</div>
 <div class="content">
 <div class="literalblock">
 <div class="content">
-<pre>$ git publish
-Publishing repository: /home/user/website
+<pre>$ touch index.html
+$ git publish index.html
+Publishing files: index.html
 Using default commit message: Publish Version
 Using default version: 1
 [master 3e9a0d8] Publish Version 1
@@ -840,7 +875,7 @@ Delta compression using up to 4 threads
 Compressing objects: 100% (2/2), done.
 Writing objects: 100% (2/2), 259 bytes | 259.00 KiB/s, done.
 Total 2 (delta 0), reused 0 (delta 0), pack-reused 0
-remote: Updating worktree: /www/example.com
+remote: Updating worktree: /var/www/example
 remote: HEAD is now at 3e9a0d8 Publish Version 1
 To example.com:/git/website.git
    cf7f00d..3e9a0d8  master -&gt; master
@@ -848,6 +883,51 @@ Published Version: 1</pre>
 </div>
 </div>
 </div>
+</div>
+<div class="paragraph">
+<p>This published the specified files, and then checked out the commit in the
+remote worktree. Because this was our first commit (the previous commit&#8217;s
+version was 0) and no message was specified with <code>-m</code>, the commit message
+defaults to 'Publish Version' plus the version appended to the end. Note how
+this changes in the example below.</p>
+</div>
+<div class="paragraph">
+<p>Now, let&#8217;s add some error pages.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 4. Publish a directory</div>
+<div class="content">
+<div class="literalblock">
+<div class="content">
+<pre>$ touch 404.html 403.html
+$ git publish
+Publishing directory: /home/user/website
+Using last commit message: Publish Version 1
+Incrementing commit version: 1 + 1
+[master dedbeef] Publish Version 2
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 404.html
+ create mode 100644 403.html
+user@example.com's password:
+Enumerating objects: 3, done.
+Counting objects: 100% (3/3), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (2/2), 259 bytes | 259.00 KiB/s, done.
+Total 2 (delta 0), reused 0 (delta 0), pack-reused 0
+remote: Updating worktree: /var/www/example
+remote: HEAD is now at 3e9a0d8 Publish Version 2
+To example.com:/git/website.git
+   cf7f00d..3e9a0d8  master -&gt; master
+Published Version: 2</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Since we didn&#8217;t specify any files to publish, it publishes every file in the
+directory. No commit message was specified, so it defaults to the last commit
+message with an incremented version number.</p>
 </div>
 </div>
 </div>
@@ -989,7 +1069,7 @@ An error occurred, probably an invalid argument or git operation.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-10-21 12:45:03 -0700
+Last updated 2022-10-21 14:30:32 -0700
 </div>
 </div>
 </body>

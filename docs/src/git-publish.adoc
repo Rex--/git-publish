@@ -113,7 +113,7 @@ that contains a path to the common repo. This might expose sensitive
 information e.g. if serving the directory with a web server. An example `.git`
 created with the publish command contains the following:
 
- gitdir: /git/example.git/worktrees/example.com
+ gitdir: /git/website.git/worktrees/example
 
 
 ==== Linux File Permissions
@@ -174,10 +174,11 @@ committed files.
 
 === Initialize Publish Repository
 When you initialize a repository with the `git publish init` command, it does
-two main things:
+three main things:
 
 1. Creates a bare repository on the given host and installs a post-receive hook.
 2. Initializes a local repository and adds the remote as origin.
+3. Creates an empty commit and pushes it to the configured branch.
 
 Let's initialize a publish repository on `example.com`. We'll call it `website`.
 
@@ -208,35 +209,58 @@ Inside of our local repo, if we run `git remote get-url origin` (or whatever
 you set the remote to be) we can see it is set up to push/pull from
 `example.com:/git/website.git`. The git-publish command just runs a `git init`
 and then `git remote add` to setup the local repository. It then creates an
-empty commit and pushes it to the remote. This empty commit can be viewed as
-the 'creation' commit.
+empty commit and pushes it to the remote with the message 'Init Version 0'.
+This empty commit can be viewed as the 'creation' commit.
 
 In our server repo, the only interesting thing you will find is a shell script
-`post-receive` that gets installed in `<repo>/hooks/` --
+`post-receive` that gets installed in `<repo>/hooks/` e.g.
 `example.git/hooks/post-receive` in the case of the example above. This script,
 which runs after a successful push, simply finds all *.publish files in the
 hooks/ directory and executes them. Other than this simple one-line script, the
 bare repository is bog standard.
 
-=== Add Publish Directory
+=== Create Publish Worktree
+The worktree(s) that hold the actual published files are created with the
+`git publish worktree` command.
 
-.Add a publish worktree
+Let's create a publish worktree on `example.com` at `/var/www/website/`. Note
+how we don't have to specify a host like `example.com`, it is extracted from
+the configured remote (default `origin`).
+
+.Create a publish worktree
 ====
- $ git publish worktree /www/example.com
+ $ git publish worktree /var/www/example
  Using remote 'origin' @ example.com:/git/website.git
- Creating publish worktree: /www/example.com
+ Creating publish worktree: /var/www/example
  user@example.com's password: 
  Preparing worktree (detached HEAD cf7f00d)
  HEAD is now at cf7f00d Init Version 0
- Successfully created worktree: /www/example.com
+ Successfully created worktree: /var/www/example
 ====
+
+This created a new linked worktree at `/var/www/example` and checked out the
+latest commit in the configured branch. If you haven't yet published any files,
+the directory will be empty except for the `.git` _file_. Refer to the 
+<<_git,.git section>> in <<Additional Considerations>> for info about this file.
+
+This command also places a `.publish` script into the common repository's
+`hook/` directory. This script contains the worktree path and the branch to
+stay up-to-date with. The file is named after the worktree path, so the
+example worktree's script would be `var-www-example.publish`. This script gets
+run on every successful push and checks out the latest commit in the configured
+branch. There is currently no way to change the branch a worktree tracks.
 
 === Publish Files to Worktrees
+Files are published to remote worktrees with the `git publish` command. Most of
+the time, no arguments are required.
 
-.Publish a repository
+Let's publish an `index.html` to our `/var/www/example/`.
+
+.Publish a file
 ====
- $ git publish
- Publishing repository: /home/user/website
+ $ touch index.html
+ $ git publish index.html
+ Publishing files: index.html
  Using default commit message: Publish Version
  Using default version: 1
  [master 3e9a0d8] Publish Version 1
@@ -249,12 +273,49 @@ bare repository is bog standard.
  Compressing objects: 100% (2/2), done.
  Writing objects: 100% (2/2), 259 bytes | 259.00 KiB/s, done.
  Total 2 (delta 0), reused 0 (delta 0), pack-reused 0
- remote: Updating worktree: /www/example.com
+ remote: Updating worktree: /var/www/example
  remote: HEAD is now at 3e9a0d8 Publish Version 1
  To example.com:/git/website.git
     cf7f00d..3e9a0d8  master -> master
  Published Version: 1
 ====
+
+This published the specified files, and then checked out the commit in the
+remote worktree. Because this was our first commit (the previous commit's
+version was 0) and no message was specified with `-m`, the commit message
+defaults to 'Publish Version' plus the version appended to the end. Note how
+this changes in the example below.
+
+Now, let's add some error pages.
+
+.Publish a directory
+====
+ $ touch 404.html 403.html
+ $ git publish
+ Publishing directory: /home/user/website
+ Using last commit message: Publish Version 1
+ Incrementing commit version: 1 + 1
+ [master dedbeef] Publish Version 2
+  2 files changed, 0 insertions(+), 0 deletions(-)
+  create mode 100644 404.html
+  create mode 100644 403.html
+ user@example.com's password: 
+ Enumerating objects: 3, done.
+ Counting objects: 100% (3/3), done.
+ Delta compression using up to 4 threads
+ Compressing objects: 100% (2/2), done.
+ Writing objects: 100% (2/2), 259 bytes | 259.00 KiB/s, done.
+ Total 2 (delta 0), reused 0 (delta 0), pack-reused 0
+ remote: Updating worktree: /var/www/example
+ remote: HEAD is now at 3e9a0d8 Publish Version 2
+ To example.com:/git/website.git
+    cf7f00d..3e9a0d8  master -> master
+ Published Version: 2
+====
+
+Since we didn't specify any files to publish, it publishes every file in the
+directory. No commit message was specified, so it defaults to the last commit
+message with an incremented version number.
 
 
 
