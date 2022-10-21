@@ -8,7 +8,8 @@ DEFAULT_GIT_BRANCH="$(git config --get init.defaultBranch)"
 DEFAULT_BRANCH="${DEFAULT_GIT_BRANCH:-master}"
 DEFAULT_FILES="-A"
 DEFAULT_MESSAGE="Publish Version"
-DEFAULT_VERSION=0
+DEFAULT_VERSION=1
+INIT_MESSAGE="Init Version 0"
 
 # Check for subcomands.
 ACTION=PUBLISH
@@ -53,8 +54,8 @@ case $ACTION in
         if [ -z "$PUBLISH_MESSAGE" ]; then
             # Get the last commit messsage
             GIT_MESSAGE="$(git log --pretty=format:"%s" -1)"
-            # Check if the last commit message is empty
-            if [ -z "$GIT_MESSAGE" ]; then
+            # Check if the last commit message is empty or if it's our init mesage
+            if [ -z "$GIT_MESSAGE" ] || [ "$GIT_MESSAGE" == "$INIT_MESSAGE" ]; then
                 # Set a default message
                 echo "Using default commit message:" "$DEFAULT_MESSAGE"
                 PUBLISH_MESSAGE=$DEFAULT_MESSAGE
@@ -153,6 +154,8 @@ find -name \\\"*.publish\\\" -exec sh \\\"{}\\\" \\\";\\\""
         # Create local repo and link it to the remote
         git init --initial-branch="$PUBLISH_BRANCH" "$PUBLISH_LOCAL"
         git --git-dir="$PUBLISH_LOCAL/.git" remote add "${PUBLISH_REMOTE:=$DEFAULT_REMOTE}" "$PUBLISH_URL"
+        git --git-dir="$PUBLISH_LOCAL/.git" commit --allow-empty -m "$INIT_MESSAGE"
+        git --git-dir="$PUBLISH_LOCAL/.git" push "$PUBLISH_REMOTE" "$PUBLISH_BRANCH"
         # git clone --origin "${PUBLISH_REMOTE:=$DEFAULT_REMOTE}" "$PUBLISH_URL" "$PUBLISH_LOCAL"
         # git --git-dir="$PUBLISH_LOCAL/.git" checkout --quiet -b "$PUBLISH_BRANCH"
     ;;
