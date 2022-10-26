@@ -1,15 +1,10 @@
 = git-publish documentation
-:link-github: https://github.com/Rex--/git-publish/tree/dev
-:link-docs: https://rex.mckinnon.ninja/git-publish-dev
-:link-docs-og: https://rex.mckinnon.ninja/git-publish
+:link-github: https://github.com/Rex--/git-publish
+:link-docs: https://rex.mckinnon.ninja/git-publish
 :icons: font
 :toc: left
 
 Publish to remote directories using `git` + `ssh`.
-
-WARNING: This document is for the dev version and as such is a WIP -- some
-information may be missing or inaccurate. You can find the original version of
-this document {link-docs-og}[here].
 
 == Quickstart
 
@@ -61,6 +56,9 @@ to run in other shells. Because of this, `bash` is listed as a requirement,
 however it may work in others.
 
 === Installing git-publish
+`git-publish` is available on {link-github}[github]. Clone the repo
+to get started, then chose from an automatic install script or manual
+installation of the software.
 
 ==== Installation script
 An installation script is provided that copies the needed files to the
@@ -148,7 +146,7 @@ you won't have to type in any passwords to login to the publish server.
 Sometimes, you may not have an ssh-agent running or maybe you are running the
 server on a non-standard port. These situations require you to configure the
 ssh connection. The current recommended way to do this is by editing
-`~/.ssh/config` and configuring a custom hostname for your ssh server. An
+`~/.ssh/config` and configuring a custom host for your ssh server. An
 example of one such host is given below:
 
  Host <custom-host>
