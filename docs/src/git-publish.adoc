@@ -16,7 +16,7 @@ also creates an initial commit with the message 'Init Version 0'.
 
 
 . Add a _publish **worktree**_. This creates a directory on the publish
-server (default `origin`) that will stay in sync with a branch (default `master`
+server (default `origin`) that will stay in sync with a branch (default `main`
 or `init.defaultBranch` if set).
 
  $ git publish worktree <remote_path> [local_path]
@@ -98,7 +98,7 @@ Alternatively to stay up-to-date with the latest release, link directly to the
 git repository. It's recommended to checkout a tag or a commit in this case.
 
 .The following has not been tested
- $ git checkout --detach master
+ $ git checkout --detach main
  $ ln -s git-publish ~/.local/bin
  $ chmod a+x git-publish
 
@@ -190,14 +190,14 @@ Let's initialize a publish repository on `example.com`. We'll call it `website`.
  Find this repo at: example.com:/git/website.git
  Cloning into local directory: website/
  Initialized empty Git repository in /home/user/website/.git/
- [master (root-commit) aa3d154] Init Version 0
+ [main (root-commit) aa3d154] Init Version 0
  user@example.com's password: 
  Enumerating objects: 2, done.
  Counting objects: 100% (2/2), done.
  Writing objects: 100% (2/2), 170 bytes | 170.00 KiB/s, done.
  Total 2 (delta 0), reused 0 (delta 0), pack-reused 0
  To example.com:/git/website.git
-  * [new branch]      master -> master
+  * [new branch]      main -> main
 ====
 
 This created two repositories: `/git/website.git` on our server and
@@ -261,7 +261,7 @@ Let's publish an `index.html` to our `/var/www/example/`.
  Publishing files: index.html
  Using default commit message: Publish Version
  Using default version: 1
- [master 3e9a0d8] Publish Version 1
+ [main 3e9a0d8] Publish Version 1
   1 file changed, 0 insertions(+), 0 deletions(-)
   create mode 100644 index.html
  user@example.com's password: 
@@ -274,7 +274,7 @@ Let's publish an `index.html` to our `/var/www/example/`.
  remote: Updating worktree: /var/www/example
  remote: HEAD is now at 3e9a0d8 Publish Version 1
  To example.com:/git/website.git
-    cf7f00d..3e9a0d8  master -> master
+    cf7f00d..3e9a0d8  main -> main
  Published Version: 1
 ====
 
@@ -293,7 +293,7 @@ Now, let's add some error pages.
  Publishing directory: /home/user/website
  Using last commit message: Publish Version 1
  Incrementing commit version: 1 + 1
- [master dedbeef] Publish Version 2
+ [main 3e9a0d8] Publish Version 2
   2 files changed, 0 insertions(+), 0 deletions(-)
   create mode 100644 404.html
   create mode 100644 403.html
@@ -307,7 +307,7 @@ Now, let's add some error pages.
  remote: Updating worktree: /var/www/example
  remote: HEAD is now at 3e9a0d8 Publish Version 2
  To example.com:/git/website.git
-    cf7f00d..3e9a0d8  master -> master
+    cf7f00d..3e9a0d8  main -> main
  Published Version: 2
 ====
 
@@ -316,6 +316,26 @@ directory. No commit message was specified, so it defaults to the last commit
 message with an incremented version number.
 
 
+=== Existing Repositories
+The `publish` command works on any existing git repository.
+The `publish worktree` command works on repositories that are configured to use
+an ssh remote and you have general SSH access to the server hosting the
+repository. Note this means it will not work on hosted git solutions e.g.
+GitHub.
+
+When the repository already exists on the host, you should use the `publish hook`
+command to update worktrees automatically. This command installs a post-receive
+hooks that gets run after every commit. After the hook has been installed, you
+can commit and push as normal and any worktrees that have been created will be
+updated.
+
+.Install hook
+====
+ $ git publish hook example.com:/git/website.git
+ Connecting to server: example.com
+ Repo: /git/website.git
+ Installed post-receive hook: /git/website.git/hooks/post-receive
+====
 
 // == git-publish(1)
 include::git-publish-man.adoc[leveloffset=+1]
@@ -325,4 +345,4 @@ include::git-publish-man.adoc[leveloffset=+1]
 ---
 [.text-center]
 [.big]#{link-github}[github] | {link-docs}[documentation]# +
-&copy; 2022 Rex McKinnon
+&copy; 2022-2024 Rex McKinnon

@@ -3,7 +3,7 @@
 :manmanual: Git-publish Manual
 :mansource: git-publish v0.0.1
 :link-git-publish-docs: https://rex.mckinnon.ninja/git-publish
-:link-git-publish-github: https://github.com/rex--/git-publish
+:link-git-publish-github: https://github.com/Rex--/git-publish
 :link-git-publish-man: https://rex.mckinnon.ninja/git-publish#_git_publish1
 
 
@@ -17,12 +17,13 @@ endif::[]
 
 == Synopsis
 
-*git publish [init|worktree] [-r remote] [-b branch] [-m message]
+*git publish [init|worktree|hook] [-r remote] [-b branch] [-m message]
 [files|host:remote_path|remote_path] [local_path]*
 
 *git publish [-r] [-b] [-m message] [files]* +
 *git publish init [-r] [-b] host:remote_path [local_path]* +
 *git publish worktree [-r] [-b] [-d] remote_path* +
+*git publish hook host:remote_path* +
 
 
 == Options
@@ -34,7 +35,7 @@ arguments and _after_ the subcommand.
     (Default _origin_)
 
 *-b branch*:: The name of the branch to perform the publish operation on.
-    (Default _master_ or _init.defaultBranch_ if set)
+    (Default _main_ or _init.defaultBranch_ if set)
 
 
 == Commands
@@ -43,7 +44,7 @@ _<remote>/<branch>_. Any worktrees that are on _<remote>_ and are configured to
 track _<branch>_ will get updated. +
 Note that all _remote_path_ arguments *MUST* be absolute paths.
 
-*publish*::
+*publish [<options>] [files]*::
     Publish _files_ to _<remote>/<branch>_. Any worktrees that have been created on
     _origin_ will be updated.
     *-m message*::: Commit message to use. If no version is found in the message,
@@ -51,7 +52,7 @@ Note that all _remote_path_ arguments *MUST* be absolute paths.
         "Publish Version")
     *files*::: List of files to publish. (Default: _-A_ All files)
 
-*publish init*::
+*publish init [<options>] host:remote_path [local_path]*::
     Initialize a repository on _host_ at _remote_path_ and link it with
     _local_path_.
     *host*::: Remote host url. Accepts _[user@]host_ and
@@ -61,11 +62,20 @@ Note that all _remote_path_ arguments *MUST* be absolute paths.
     *local_path*::: Optional path to the local repository. (Default: Create a
         directory with the remote repository's name e.g. _./something-like/_)
 
-*publish worktree*::
+*publish worktree [<options>] remote_path*::
     Create a new worktree on _<remote>_ at _remote_path_ that gets updated on every
     push to _<branch>_. If the -d flag is specified, delete an existing worktree.
     *-d*::: Delete an existing worktree instead of creating a new one.
     *remote_path*::: Absolute path of worktree on the remote.
+
+*publish hook host:remote_path*::
+    Installs a post-receive hook to _remote_path_ on _host_. This allows
+    publish worktrees to be created on an existing repository.
+    Note that this command can be run from anywhere.
+    *host*::: Remote host url. Accepts _[user@]host_ and
+        _ssh://[user@]host[:port]_ formats.
+    *remote_path*::: Absolute path of the bare git repository on _host_.
+        e.g. _/git/something-like.git_
 
 == Exit status
 
@@ -91,7 +101,7 @@ Checkout the documentation for examples and more information about usages.
 
 
 == Copying
-Copyright (C) 2022 Rex McKinnon +
+Copyright (C) 2022-2024 Rex McKinnon +
 This software is available for free under the permissive University of
 Illinois/NCSA Open Source License. See the LICENSE file for full details.
 

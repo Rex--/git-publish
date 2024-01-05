@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <title>git-publish documentation</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -84,10 +84,10 @@ code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;
 ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
 ul,ol{margin-left:1.5em}
 ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
-ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
-ul.square{list-style-type:square}
 ul.circle{list-style-type:circle}
 ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
 ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
 dl dt{margin-bottom:.3125em;font-weight:bold}
 dl dd{margin-bottom:1.25em}
@@ -208,13 +208,10 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
 .sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
 .literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
 @media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
 @media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
@@ -393,7 +390,7 @@ b.conum *{color:inherit!important}
 dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
 p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -456,6 +453,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_initialize_publish_repository">Initialize Publish Repository</a></li>
 <li><a href="#_create_publish_worktree">Create Publish Worktree</a></li>
 <li><a href="#_publish_files_to_worktrees">Publish Files to Worktrees</a></li>
+<li><a href="#_existing_repositories">Existing Repositories</a></li>
 </ul>
 </li>
 <li><a href="#_git_publish1">git-publish(1)</a>
@@ -474,20 +472,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="paragraph">
 <p>Publish to remote directories using <code>git</code> + <code>ssh</code>.</p>
-</div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-This document is for the dev version and as such is a WIP&#8201;&#8212;&#8201;some
-information may be missing or inaccurate. You can find the original version of
-this document <a href="https://rex.mckinnon.ninja/git-publish">here</a>.
-</td>
-</tr>
-</table>
 </div>
 </div>
 </div>
@@ -508,7 +492,7 @@ also creates an initial commit with the message 'Init Version 0'.</p>
 </li>
 <li>
 <p>Add a <em>publish <strong>worktree</strong></em>. This creates a directory on the publish
-server (default <code>origin</code>) that will stay in sync with a branch (default <code>master</code>
+server (default <code>origin</code>) that will stay in sync with a branch (default <code>main</code>
 or <code>init.defaultBranch</code> if set).</p>
 <div class="literalblock">
 <div class="content">
@@ -571,7 +555,7 @@ however it may work in others.</p>
 <div class="sect2">
 <h3 id="_installing_git_publish">Installing git-publish</h3>
 <div class="paragraph">
-<p><code>git-publish</code> is available on <a href="https://github.com/Rex--/git-publish/tree/dev">github</a>. Clone the repo
+<p><code>git-publish</code> is available on <a href="https://github.com/Rex--/git-publish">github</a>. Clone the repo
 to get started, then chose from an automatic install script or manual
 installation of the software.</p>
 </div>
@@ -627,7 +611,7 @@ git repository. It&#8217;s recommended to checkout a tag or a commit in this cas
 <div class="literalblock">
 <div class="title">The following has not been tested</div>
 <div class="content">
-<pre>$ git checkout --detach master
+<pre>$ git checkout --detach main
 $ ln -s git-publish ~/.local/bin
 $ chmod a+x git-publish</pre>
 </div>
@@ -776,14 +760,14 @@ Initialized empty Git repository in /git/website.git/
 Find this repo at: example.com:/git/website.git
 Cloning into local directory: website/
 Initialized empty Git repository in /home/user/website/.git/
-[master (root-commit) aa3d154] Init Version 0
+[main (root-commit) aa3d154] Init Version 0
 user@example.com's password:
 Enumerating objects: 2, done.
 Counting objects: 100% (2/2), done.
 Writing objects: 100% (2/2), 170 bytes | 170.00 KiB/s, done.
 Total 2 (delta 0), reused 0 (delta 0), pack-reused 0
 To example.com:/git/website.git
- * [new branch]      master -&gt; master</pre>
+ * [new branch]      main -&gt; main</pre>
 </div>
 </div>
 </div>
@@ -870,7 +854,7 @@ $ git publish index.html
 Publishing files: index.html
 Using default commit message: Publish Version
 Using default version: 1
-[master 3e9a0d8] Publish Version 1
+[main 3e9a0d8] Publish Version 1
  1 file changed, 0 insertions(+), 0 deletions(-)
  create mode 100644 index.html
 user@example.com's password:
@@ -883,7 +867,7 @@ Total 2 (delta 0), reused 0 (delta 0), pack-reused 0
 remote: Updating worktree: /var/www/example
 remote: HEAD is now at 3e9a0d8 Publish Version 1
 To example.com:/git/website.git
-   cf7f00d..3e9a0d8  master -&gt; master
+   cf7f00d..3e9a0d8  main -&gt; main
 Published Version: 1</pre>
 </div>
 </div>
@@ -909,7 +893,7 @@ $ git publish
 Publishing directory: /home/user/website
 Using last commit message: Publish Version 1
 Incrementing commit version: 1 + 1
-[master dedbeef] Publish Version 2
+[main 3e9a0d8] Publish Version 2
  2 files changed, 0 insertions(+), 0 deletions(-)
  create mode 100644 404.html
  create mode 100644 403.html
@@ -923,7 +907,7 @@ Total 2 (delta 0), reused 0 (delta 0), pack-reused 0
 remote: Updating worktree: /var/www/example
 remote: HEAD is now at 3e9a0d8 Publish Version 2
 To example.com:/git/website.git
-   cf7f00d..3e9a0d8  master -&gt; master
+   cf7f00d..3e9a0d8  main -&gt; main
 Published Version: 2</pre>
 </div>
 </div>
@@ -935,6 +919,36 @@ directory. No commit message was specified, so it defaults to the last commit
 message with an incremented version number.</p>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_existing_repositories">Existing Repositories</h3>
+<div class="paragraph">
+<p>The <code>publish</code> command works on any existing git repository.
+The <code>publish worktree</code> command works on repositories that are configured to use
+an ssh remote and you have general SSH access to the server hosting the
+repository. Note this means it will not work on hosted git solutions e.g.
+GitHub.</p>
+</div>
+<div class="paragraph">
+<p>When the repository already exists on the host, you should use the <code>publish hook</code>
+command to update worktrees automatically. This command installs a post-receive
+hooks that gets run after every commit. After the hook has been installed, you
+can commit and push as normal and any worktrees that have been created will be
+updated.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 5. Install hook</div>
+<div class="content">
+<div class="literalblock">
+<div class="content">
+<pre>$ git publish hook example.com:/git/website.git
+Connecting to server: example.com
+Repo: /git/website.git
+Installed post-receive hook: /git/website.git/hooks/post-receive</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -943,13 +957,14 @@ message with an incremented version number.</p>
 <div class="sect2">
 <h3 id="_synopsis">Synopsis</h3>
 <div class="paragraph">
-<p><strong>git publish [init|worktree] [-r remote] [-b branch] [-m message]
+<p><strong>git publish [init|worktree|hook] [-r remote] [-b branch] [-m message]
 [files|host:remote_path|remote_path] [local_path]</strong></p>
 </div>
 <div class="paragraph">
 <p><strong>git publish [-r] [-b] [-m message] [files]</strong><br>
 <strong>git publish init [-r] [-b] host:remote_path [local_path]</strong><br>
-<strong>git publish worktree [-r] [-b] [-d] remote_path</strong><br></p>
+<strong>git publish worktree [-r] [-b] [-d] remote_path</strong><br>
+<strong>git publish hook host:remote_path</strong><br></p>
 </div>
 </div>
 <div class="sect2">
@@ -969,7 +984,7 @@ arguments and <em>after</em> the subcommand.</p>
 <dt class="hdlist1"><strong>-b branch</strong></dt>
 <dd>
 <p>The name of the branch to perform the publish operation on.
-(Default <em>master</em> or <em>init.defaultBranch</em> if set)</p>
+(Default <em>main</em> or <em>init.defaultBranch</em> if set)</p>
 </dd>
 </dl>
 </div>
@@ -984,7 +999,7 @@ Note that all <em>remote_path</em> arguments <strong>MUST</strong> be absolute p
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1"><strong>publish</strong></dt>
+<dt class="hdlist1"><strong>publish [&lt;options&gt;] [files]</strong></dt>
 <dd>
 <p>Publish <em>files</em> to <em>&lt;remote&gt;/&lt;branch&gt;</em>. Any worktrees that have been created on
 <em>origin</em> will be updated.</p>
@@ -1003,7 +1018,7 @@ one will be appended to the end. (Default: Last commit if exists, else
 </dl>
 </div>
 </dd>
-<dt class="hdlist1"><strong>publish init</strong></dt>
+<dt class="hdlist1"><strong>publish init [&lt;options&gt;] host:remote_path [local_path]</strong></dt>
 <dd>
 <p>Initialize a repository on <em>host</em> at <em>remote_path</em> and link it with
 <em>local_path</em>.</p>
@@ -1027,7 +1042,7 @@ directory with the remote repository&#8217;s name e.g. <em>./something-like/</em
 </dl>
 </div>
 </dd>
-<dt class="hdlist1"><strong>publish worktree</strong></dt>
+<dt class="hdlist1"><strong>publish worktree [&lt;options&gt;] remote_path</strong></dt>
 <dd>
 <p>Create a new worktree on <em>&lt;remote&gt;</em> at <em>remote_path</em> that gets updated on every
 push to <em>&lt;branch&gt;</em>. If the -d flag is specified, delete an existing worktree.</p>
@@ -1040,6 +1055,26 @@ push to <em>&lt;branch&gt;</em>. If the -d flag is specified, delete an existing
 <dt class="hdlist1"><strong>remote_path</strong></dt>
 <dd>
 <p>Absolute path of worktree on the remote.</p>
+</dd>
+</dl>
+</div>
+</dd>
+<dt class="hdlist1"><strong>publish hook host:remote_path</strong></dt>
+<dd>
+<p>Installs a post-receive hook to <em>remote_path</em> on <em>host</em>. This allows
+publish worktrees to be created on an existing repository.
+Note that this command can be run from anywhere.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><strong>host</strong></dt>
+<dd>
+<p>Remote host url. Accepts <em>[user@]host</em> and
+<em>ssh://[user@]host[:port]</em> formats.</p>
+</dd>
+<dt class="hdlist1"><strong>remote_path</strong></dt>
+<dd>
+<p>Absolute path of the bare git repository on <em>host</em>.
+e.g. <em>/git/something-like.git</em></p>
 </dd>
 </dl>
 </div>
@@ -1065,8 +1100,8 @@ An error occurred, probably an invalid argument or git operation.</p>
 </div>
 <hr>
 <div class="paragraph text-center">
-<p><span class="big"><a href="https://github.com/Rex--/git-publish/tree/dev">github</a> | <a href="https://rex.mckinnon.ninja/git-publish-dev">documentation</a></span><br>
-&copy; 2022 Rex McKinnon</p>
+<p><span class="big"><a href="https://github.com/Rex--/git-publish">github</a> | <a href="https://rex.mckinnon.ninja/git-publish">documentation</a></span><br>
+&copy; 2022-2024 Rex McKinnon</p>
 </div>
 </div>
 </div>
@@ -1074,7 +1109,7 @@ An error occurred, probably an invalid argument or git operation.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-10-25 20:19:07 -0700
+Last updated 2024-01-05 15:36:26 -0800
 </div>
 </div>
 </body>

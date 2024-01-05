@@ -34,6 +34,6 @@ Resources
 
 Copying
 -------
-Copyright (C) 2022 Rex McKinnon \
+Copyright (C) 2022-2024 Rex McKinnon \
 This software is available for free under the permissive University of
 Illinois/NCSA Open Source License. See the LICENSE file for full details.
